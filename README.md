@@ -155,16 +155,3 @@ tests/         Tests unitaires et fonctionnels
 tools/ocr/     Traitement OCR local des documents FFBB
 ```
 
-## Déploiement
-
-Prévoir un environnement PHP compatible, une base de données et, pour les imports OCR, Node.js et Poppler. Compiler les assets pour la production et appliquer les migrations avant utilisation.
-
-Les documents importés sont conservés localement : l’hébergement doit disposer d’un stockage privé persistant. La commande `php bin/console app:imports:cleanup` permet de purger les aperçus d’import expirés. Le serveur de développement est réservé à une utilisation locale.
-
-## Contribution
-
-Les signalements de bugs et propositions d’amélioration peuvent être ouverts dans les issues du dépôt. Pour une modification, décrire le problème résolu et les vérifications effectuées dans la pull request. Utiliser des données fictives ou anonymisées pour les exemples et les tests.
-
-## Licence
-
-Aucune licence open source n’est actuellement fournie. Le projet est déclaré `proprietary` dans `composer.json`.
