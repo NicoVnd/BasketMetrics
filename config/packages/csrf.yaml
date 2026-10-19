@@ -1,0 +1,6 @@
+framework:
+    csrf_protection: true
+    form:
+        csrf_protection:
+            enabled: true
+            token_id: submit

@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+{% block body %}
+<main class="auth-page">
+    <aside class="auth-story">
+        <a href="{{ path('app_dashboard') }}" class="brand"><img src="/favicon.svg" alt="" width="44" height="44"><span>Basket<span class="brand-light">Metrics</span><small>LE JEU. LES CHIFFRES.</small></span></a>
+        <div class="auth-story-copy"><p class="eyebrow">POUR CEUX QUI FONT VIVRE LE BASKET.</p><h2>Du collectif.<br>Du jeu.<br><span>Du progrès.</span></h2><p>Vos équipes, vos matchs et vos statistiques.<br>Tout votre basket, au même endroit.</p></div>
+        <div class="auth-court" aria-hidden="true"><span></span></div>
+        <p class="auth-story-footer">CHAQUE MATCH A QUELQUE CHOSE À RACONTER.</p>
+    </aside>
+    <div class="auth-form-side"><div class="auth-form-wrap"><div class="auth-form-kicker"><span class="status-dot"></span> VOTRE ESPACE COACH</div><section class="auth-card">{% block auth_content %}{% endblock %}</section><p class="auth-footnote">Le terrain vous attend.</p></div></div>
+</main>
+{% endblock %}

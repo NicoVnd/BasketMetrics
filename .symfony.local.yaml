@@ -1,0 +1,6 @@
+http:
+    port: 8000
+    allow_http: true
+workers:
+    tailwind:
+        cmd: ['symfony', 'console', 'tailwind:build', '--watch']

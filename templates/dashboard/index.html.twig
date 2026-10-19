@@ -1,0 +1,20 @@
+{% extends 'workspace.html.twig' %}
+{% block title %}Mes équipes — BasketMetrics{% endblock %}
+{% block workspace_content %}
+<section class="dashboard-hero">
+    <div class="hero-copy"><p class="eyebrow">BIENVENUE DANS VOTRE VESTIAIRE</p><h1>Votre équipe.<br>Votre prochain <span>progrès.</span></h1><p>Rassemblez votre effectif, suivez vos matchs<br class="desktop-break"> et donnez du sens à chaque performance.</p><a class="button-primary" href="{{ path('app_team_new') }}"><span aria-hidden="true">＋</span> Créer une équipe</a></div>
+    <div class="hero-court" aria-hidden="true"><div class="court-boundary"><div class="court-middle"></div><div class="court-circle"></div><div class="court-key court-key-left"></div><div class="court-key court-key-right"></div></div><span class="court-ball"></span><span class="court-caption">PRÊT POUR LE PROCHAIN MATCH.</span></div>
+</section>
+<div class="section-heading"><div><p class="eyebrow">VOTRE COLLECTIF</p><h2>Mes équipes <span class="count-badge">{{ teams|length }}</span></h2></div><span class="section-subtitle">Un espace pour chaque équipe.</span></div>
+<div class="teams-grid">
+    {% for team in teams %}
+        <a href="{{ path('app_team_show', {id: team.id}) }}" class="team-card">
+            <div class="team-card-top"><span class="team-avatar">{{ team.name|slice(0, 2)|upper }}</span><span class="team-card-arrow" aria-hidden="true">↗</span></div>
+            <p class="team-category">{{ team.category ?: 'Mon équipe' }}</p><h3>{{ team.name }}</h3><div class="team-card-bottom">Effectif & matchs <span aria-hidden="true">→</span></div>
+        </a>
+    {% else %}
+        <section class="empty-teams"><div class="empty-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="19" cy="16" r="6"/><path d="M7 37v-4c0-7 24-7 24 0v4M32 11a6 6 0 0 1 0 12M36 28c4 1 6 3 6 6v3"/></svg></div><h3>Le collectif commence ici.</h3><p>Votre première équipe n’attend que vous.<br>Ajoutez vos joueurs, puis préparez votre premier match.</p><a href="{{ path('app_team_new') }}" class="button-secondary">Créer ma première équipe <span aria-hidden="true">→</span></a></section>
+    {% endfor %}
+</div>
+<div class="getting-started"><span class="step-number">01</span><div><strong>Créez votre équipe</strong><p>Un nom et une catégorie.</p></div><span class="step-divider" aria-hidden="true">→</span><span class="step-number">02</span><div><strong>Ajoutez vos joueurs</strong><p>Le collectif prend forme.</p></div><span class="step-divider" aria-hidden="true">→</span><span class="step-number">03</span><div><strong>Suivez vos matchs</strong><p>Les chiffres racontent le jeu.</p></div></div>
+{% endblock %}

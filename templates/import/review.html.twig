@@ -1,0 +1,27 @@
+{% extends 'workspace.html.twig' %}
+{% block title %}Vérifier l’import — BasketMetrics{% endblock %}
+{% block workspace_content %}
+<a href="{{ path('app_team_show',{id:team.id}) }}" class="text-orange-400 underline">← {{ team.name }}</a>
+<p class="eyebrow mt-8">VÉRIFICATION AVANT ENREGISTREMENT</p><h1 class="mt-3 text-3xl font-bold">Vérifier l’import</h1>
+<div class="panel mt-6"><p><strong>Locaux :</strong> {{ payload.homeName }}<br><strong>Visiteurs :</strong> {{ payload.awayName }}</p><p class="mt-3 text-orange-300">{{ team.name }} correspond aux {{ payload.side == 'home' ? 'locaux (équipe A)' : 'visiteurs (équipe B)' }}. Si ce choix est incorrect, annulez cet aperçu puis recommencez avec l’autre côté.</p><p class="mt-3 text-sm text-slate-400">Aucun joueur ni match n’est encore créé. Une case vide reste une valeur inconnue. Les numéros ci-dessous sont ceux de ce match, pas une identité permanente.</p></div>
+{% if warnings %}<details open class="panel mt-6 import-warnings"><summary class="font-semibold text-amber-300">{{ warnings|length }} points à vérifier</summary><ul class="mt-4 list-inside list-disc space-y-2 text-sm text-amber-200">{% for warning in warnings %}<li>{{ warning }}</li>{% endfor %}</ul></details>{% endif %}
+{% include 'import/documents.html.twig' with {job:job} %}
+{{ form_start(form,{attr:{class:'workspace-form mt-8','data-turbo':'false'}}) }}
+<div class="import-errors" role="alert">{{ form_errors(form) }}</div>
+<section class="panel"><h2 class="mb-6 text-xl font-semibold">Le match</h2><div class="grid gap-6 md:grid-cols-2"><div>{{ form_row(form.existingMatch) }}{{ form_widget(form.game) }}</div><div>{{ form_row(form.reference) }}{{ form_row(form.competition) }}{{ form_row(form.venue) }}<p class="mt-6 text-sm text-slate-400">Un match déjà saisi le même jour peut être complété. Vérifiez la destination choisie : les scores et les statistiques des joueurs sélectionnés seront remplacés par les valeurs de cet aperçu.</p></div></div></section>
+{% if form.periods|length %}<section class="panel mt-6"><h2 class="mb-6 text-xl font-semibold">Scores par période</h2><div class="grid grid-cols-2 gap-5 lg:grid-cols-4">{% for period in form.periods %}<fieldset><legend class="mb-3 text-orange-300">{{ payload.periods[loop.index0].number <= 4 ? 'Quart-temps ' ~ payload.periods[loop.index0].number : 'Prolongation' }}</legend>{{ form_widget(period) }}</fieldset>{% endfor %}</div></section>{% endif %}
+<h2 class="mt-10 text-2xl font-semibold">Joueurs et statistiques</h2><p class="mt-3 text-slate-400">Licence identique d’abord, puis nom et prénom. Pour un surnom, une abréviation ou un homonyme, choisissez le joueur existant dans la liste.</p>
+{{ form_errors(form.players) }}
+<div class="mt-6 grid gap-6 xl:grid-cols-2">
+{% for row in form.players %}
+    <fieldset class="panel min-w-0"><legend class="px-2 font-semibold">{{ payload.players[payload.side][loop.index0].firstName }} {{ payload.players[payload.side][loop.index0].lastName }}</legend>
+        {{ form_errors(row) }}{{ form_row(row.include) }}{{ form_row(row.existingPlayer) }}<p class="mb-5 text-xs text-orange-300">{{ row.vars.data.matchReason }}</p>
+        {{ form_row(row.participation) }}
+        <div class="grid grid-cols-2 gap-4">{{ form_row(row.firstName) }}{{ form_row(row.lastName) }}{{ form_row(row.licenseNumber) }}{{ form_row(row.jerseyNumber) }}{{ form_row(row.points) }}{{ form_row(row.secondsPlayed) }}{{ form_row(row.fouls) }}{{ form_row(row.fieldGoalsMade) }}{{ form_row(row.twoPtMade) }}{{ form_row(row.threePtMade) }}{{ form_row(row.twoPtInsideMade) }}{{ form_row(row.twoPtOutsideMade) }}{{ form_row(row.freeThrowsMade) }}{{ form_row(row.starter) }}{{ form_row(row.captain) }}</div>
+    </fieldset>
+{% endfor %}
+</div>
+<section class="panel mt-8">{{ form_row(form.acknowledge) }}<button class="button-primary mt-6" type="submit">Valider et enregistrer le match</button></section>
+{{ form_end(form) }}
+<form class="mt-6" action="{{ path('app_import_cancel',{id:job.id}) }}" method="post" data-turbo="false"><input type="hidden" name="_token" value="{{ csrf_token('cancel_import_' ~ job.id) }}"><button class="button-secondary" type="submit">Annuler cet aperçu</button></form>
+{% endblock %}

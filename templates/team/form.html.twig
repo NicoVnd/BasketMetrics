@@ -1,0 +1,14 @@
+{% extends 'workspace.html.twig' %}
+{% block title %}{{ title }} — Basket Analytics{% endblock %}
+{% block workspace_content %}
+<div class="mx-auto max-w-2xl">
+    <a href="{{ back }}" class="text-sm text-orange-400 underline">← Retour</a>
+    <h1 class="mt-6 text-3xl font-bold">{{ title }}</h1>
+    <section class="panel mt-8">
+        {{ form_start(form, {attr: {class: 'workspace-form space-y-5', 'data-turbo': 'false'}}) }}
+        {{ form_widget(form) }}
+        <button class="button-primary mt-6" type="submit">Enregistrer</button>
+        {{ form_end(form) }}
+    </section>
+</div>
+{% endblock %}

@@ -1,0 +1,4 @@
+<form method="get" class="season-filter mt-6">
+    <label for="season">Saison</label><select id="season" name="season">{% for year,label in season.seasons %}<option value="{{ year }}" {{ year == season.year ? 'selected' : '' }}>{{ label }}</option>{% endfor %}</select>
+    <button class="button-secondary" type="submit">Afficher</button>
+</form>

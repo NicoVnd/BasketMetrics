@@ -1,0 +1,22 @@
+framework:
+    session:
+        cookie_httponly: true
+        cookie_secure: auto
+        cookie_samesite: lax
+    rate_limiter:
+        ai:
+            policy: fixed_window
+            limit: 6
+            interval: '1 hour'
+        imports:
+            policy: fixed_window
+            limit: 4
+            interval: '15 minutes'
+        registration:
+            policy: fixed_window
+            limit: 5
+            interval: '1 hour'
+when@prod:
+    framework:
+        session:
+            cookie_secure: true

@@ -1,0 +1,10 @@
+{
+  "name": "basketmetrics-local-ocr",
+  "private": true,
+  "description": "OCR local des documents FFBB, sans envoi externe",
+  "dependencies": {
+    "@tesseract.js-data/fra": "^1.0.0",
+    "sharp": "^0.35.5",
+    "tesseract.js": "^6.0.1"
+  }
+}

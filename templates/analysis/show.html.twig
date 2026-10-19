@@ -1,0 +1,30 @@
+{% extends 'workspace.html.twig' %}
+{% block title %}Analyse IA — {{ team.name }}{% endblock %}
+{% block workspace_content %}
+<a class="text-orange-400 underline" href="{{ path('app_team_show',{id:team.id,season:context.season}) }}">← {{ team.name }}</a>
+<h1 class="mt-6 text-3xl font-bold">{{ context.title }}</h1>
+<p class="stats-note">Saison {{ context.data.season }} · Analyse facultative par Gemini</p>
+<section class="panel mt-6">
+    <p>La génération transmet à Google les statistiques pseudonymisées et leurs dates. Aucun nom, numéro de licence ou document PDF n’est envoyé. Les identifiants J correspondent aux joueurs indiqués ci-dessous.</p>
+    <p class="stats-note">Le rapport peut comporter des erreurs : vérifiez les conclusions avant de préparer vos séances. Aucun appel n’est effectué à l’ouverture de cette page.</p>
+    {% if not configured %}<p role="status" class="mt-4">L’IA est désactivée. Renseignez GEMINI_API_KEY et GEMINI_MODEL dans .env.local côté serveur. Les statistiques restent disponibles.</p>{% endif %}
+    {% if not context.hasData %}<p class="mt-4">Aucun match terminé à analyser dans cette période.</p>{% endif %}
+    {% if error %}<p role="alert" class="mt-4 text-red-300">{{ error }}</p>{% endif %}
+    <form method="post" class="mt-6" data-turbo="false">
+        <input type="hidden" name="_token" value="{{ csrf_token('analysis_' ~ scope ~ '_' ~ target ~ '_' ~ context.season) }}">
+        <button type="submit" class="button-primary" {% if not configured or not context.hasData %}disabled{% endif %}>{{ report ? 'Régénérer l’analyse' : 'Générer l’analyse' }}</button>
+    </form>
+</section>
+{% if report %}
+<section class="panel mt-6">
+    <h2 class="text-xl font-semibold">Compte rendu enregistré</h2>
+    <p class="stats-note">{{ report.generatedAt|date('d/m/Y H:i','Europe/Paris') }} · {{ report.model }} · Prompt {{ report.promptVersion }}</p>
+    {% if stale %}<p role="alert" class="my-4 text-amber-300">Les données ou la configuration ont changé depuis ce rapport. Régénérez-le pour obtenir une analyse à jour.</p>{% endif %}
+    <div class="mt-6 whitespace-pre-wrap leading-relaxed">{{ report.content }}</div>
+</section>
+{% endif %}
+<details class="panel mt-6"><summary>Correspondance des joueurs et données transmises</summary>
+<ul class="mt-4">{% for alias,name in context.labels %}<li>{{ alias }} : {{ name }}</li>{% endfor %}</ul>
+<pre class="mt-4 overflow-x-auto whitespace-pre-wrap text-xs">{{ context.data|json_encode(constant('JSON_PRETTY_PRINT') b-or constant('JSON_UNESCAPED_UNICODE')) }}</pre>
+</details>
+{% endblock %}
