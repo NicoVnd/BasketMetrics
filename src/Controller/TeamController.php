@@ -25,6 +25,9 @@ final class TeamController extends AbstractController
     }
 
     #[Route('/teams/{id}', name: 'app_team_show', requirements: ['id' => '\d+'], methods: ['GET'])]
+    #[Route('/teams/{id}/matches', name: 'app_team_matches', requirements: ['id' => '\d+'], methods: ['GET'])]
+    #[Route('/teams/{id}/players', name: 'app_team_players', requirements: ['id' => '\d+'], methods: ['GET'])]
+    #[Route('/teams/{id}/season', name: 'app_team_season', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function show(int $id, Request $request, EntityManagerInterface $em, \App\Service\Statistics\SeasonStatistics $statistics, \App\Service\Statistics\StatisticsCharts $charts): Response
     {
         $team = $em->find(Team::class, $id) ?? throw $this->createNotFoundException();
@@ -32,6 +35,12 @@ final class TeamController extends AbstractController
         $season = $statistics->load($team, $request->query->get('season'), $request->query->get('sort', 'points'));
         return $this->render('team/show.html.twig', [
             'team' => $team,
+            'teamView' => match ($request->attributes->get('_route')) {
+                'app_team_matches' => 'matches',
+                'app_team_players' => 'players',
+                'app_team_season' => 'season',
+                default => 'all',
+            },
             'season' => $season, 'summary' => $season['summary'], 'teamChart' => $charts->team($season['summary']),
             'players' => $season['players'],
             'matches' => array_reverse($season['summary']['games']),

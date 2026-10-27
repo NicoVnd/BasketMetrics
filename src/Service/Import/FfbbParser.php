@@ -30,8 +30,8 @@ final class FfbbParser
         if ($dateTime === null) { $this->warnings[] = 'Date ou heure illisible : renseignez-les avant validation.'; }
         $reference = $this->zone($summary, .185, .075, .25, .095);
         $reference = preg_match('/\b\d{1,8}\b/', $reference, $ref) ? $ref[0] : null;
-        $home = trim($this->zone($summary, .674, 0, .985, .019));
-        $away = trim($this->zone($summary, .674, .019, .985, .039));
+        $home = trim($summary['teamNames']['home'] ?? $this->zone($summary, .674, 0, .985, .019));
+        $away = trim($summary['teamNames']['away'] ?? $this->zone($summary, .674, .019, .985, .039));
         $away = preg_replace('/\s+-\s*$/', '', $away);
         if (!$home || !$away) { throw new ImportException('Les noms des équipes ne sont pas lisibles dans le résumé.'); }
         $visitorY = .54;

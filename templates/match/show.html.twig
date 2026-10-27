@@ -1,34 +1,36 @@
 {% extends 'workspace.html.twig' %}
-{% block title %}{{ team.name }} / {{ game.opponent }} — Basket Analytics{% endblock %}
+{% block title %}{{ team.name }} / {{ game.opponent }} — BasketMetrics{% endblock %}
 {% block workspace_content %}
-<a href="{{ path('app_team_show', {id: team.id}) }}" class="text-sm text-orange-400 underline">← {{ team.name }}</a>
-<div class="mt-6 flex flex-wrap items-center justify-between gap-6">
-    <div><h1 class="text-3xl font-bold">{{ team.name }} / {{ game.opponent }}</h1><p class="mt-3 text-slate-400">{{ game.playedAt|date('d/m/Y H:i', 'Europe/Paris') }} · {{ game.home ? 'Domicile' : 'Extérieur' }} · {{ game.status == 'finished' ? 'Terminé' : 'À jouer' }}</p></div>
-    <div class="flex flex-wrap items-center gap-4">
+<a href="{{ path('app_team_show', {id: team.id}) }}" class="text-sm text-accent underline">← {{ team.name }}</a>
+<header class="match-heading mt-6"><h1 class="text-3xl font-bold">{{ team.name }} / {{ game.opponent }}</h1><p class="mt-3 text-muted">{{ game.playedAt|date('d/m/Y H:i', 'Europe/Paris') }} · {{ game.home ? 'Domicile' : 'Extérieur' }} · {{ game.status == 'finished' ? 'Terminé' : 'À jouer' }}</p></header>
+{% set knownScore = game.status == 'finished' and game.teamScore is not null and game.opponentScore is not null %}
+{% set matchResult = knownScore ? (game.teamScore > game.opponentScore ? 'V' : (game.teamScore < game.opponentScore ? 'D' : 'N')) : '' %}
+<section class="panel scoreboard" aria-label="Score du match">
+    <div class="scoreboard-team"><span class="team-avatar" aria-hidden="true">{{ team.name|slice(0,2)|upper }}</span><h2>{{ team.name }}</h2><p class="stats-note">{{ game.home ? 'Domicile' : 'Extérieur' }}</p></div>
+    <div class="scoreboard-total"><p class="eyebrow">{{ game.status == 'finished' ? 'SCORE FINAL' : 'À JOUER' }}</p><p class="score"><span class="score-for {{ knownScore ? 'score-' ~ matchResult : '' }}">{{ game.teamScore ?? '—' }}</span><span class="score-divider">:</span><span class="score-against">{{ game.opponentScore ?? '—' }}</span></p>{% if knownScore %}<p class="match-verdict result-{{ matchResult }}">{{ matchResult == 'V' ? 'Victoire' : (matchResult == 'D' ? 'Défaite' : 'Match nul') }}</p>{% endif %}</div>
+    <div class="scoreboard-team"><span class="team-avatar" aria-hidden="true">{{ game.opponent|slice(0,2)|upper }}</span><h2>{{ game.opponent }}</h2><p class="stats-note">{{ game.home ? 'Extérieur' : 'Domicile' }}</p></div>
+</section>
+<div class="match-actions" role="group" aria-label="Actions du match">
         {% if game.status == 'finished' %}<a class="button-secondary" href="{{ path('app_analysis',{teamId:team.id,scope:'match',target:game.id}) }}">Analyse IA du match et des joueurs</a>{% endif %}
         <a class="button-secondary" href="{{ path('app_match_edit', {teamId: team.id, id: game.id}) }}">Modifier le match</a>
         <form method="post" action="{{ path('app_match_delete', {teamId: team.id, id: game.id}) }}" data-turbo="false" onsubmit="return confirm('Supprimer définitivement ce match, ses statistiques et ses documents importés ?')">
             <input type="hidden" name="_token" value="{{ csrf_token('delete_match_' ~ game.id) }}">
-            <button class="button-secondary text-red-400 hover:text-red-300" type="submit">Supprimer le match</button>
+            <button class="button-secondary text-danger hover:text-danger" type="submit">Supprimer le match</button>
         </form>
-    </div>
 </div>
-<section class="panel mt-8 flex flex-wrap items-center justify-between gap-4">
-    <div><p class="text-sm text-slate-400">Score — {{ team.name }} / {{ game.opponent }}</p><p class="mt-2 text-4xl font-bold">{{ game.teamScore is not null ? game.teamScore : '—' }} : {{ game.opponentScore is not null ? game.opponentScore : '—' }}</p></div>
-    <p class="max-w-md text-sm text-slate-400">Une case vide signifie « inconnu ». Saisissez 0 seulement si la statistique est connue et nulle. Le temps de jeu se saisit au format min:ss.</p>
-</section>
-{% if warnings %}<aside role="alert" class="mt-6 rounded-xl border border-amber-700 bg-amber-950 p-5 text-amber-200"><h2 class="font-semibold">Points à vérifier</h2><ul class="mt-3 list-inside list-disc space-y-2">{% for warning in warnings %}<li>{{ warning }}</li>{% endfor %}</ul></aside>{% endif %}
+<p class="stats-note">Une case vide signifie « inconnu ». Saisissez 0 seulement si la statistique est connue et nulle. Le temps de jeu se saisit au format min:ss.</p>
+{% if warnings %}<aside role="alert" class="mt-6 rounded-xl border warning-surface p-5 text-warning"><h2 class="font-semibold">Points à vérifier</h2><ul class="mt-3 list-inside list-disc space-y-2">{% for warning in warnings %}<li>{{ warning }}</li>{% endfor %}</ul></aside>{% endif %}
 <h2 class="mt-10 text-2xl font-semibold">Statistiques des joueurs</h2>
-{% if periods %}<section class="panel mt-6"><h3 class="mb-4 font-semibold">Scores par période — {{ team.name }} / {{ game.opponent }}</h3><div class="flex flex-wrap gap-6">{% for period in periods %}<div><p class="text-xs text-slate-400">{{ period.periodNumber <= 4 ? 'QT ' ~ period.periodNumber : 'Prolongation ' ~ (period.periodNumber - 4) }}</p><p class="mt-2 text-xl font-semibold">{{ period.teamPoints is not null ? period.teamPoints : '—' }} : {{ period.opponentPoints is not null ? period.opponentPoints : '—' }}</p></div>{% endfor %}</div></section>{% endif %}
+{% if periods %}<section class="panel mt-6"><h3 class="mb-4 font-semibold">Scores par période — {{ team.name }} / {{ game.opponent }}</h3><div class="flex flex-wrap gap-6">{% for period in periods %}<div><p class="text-xs text-muted">{{ period.periodNumber <= 4 ? 'QT ' ~ period.periodNumber : 'Prolongation ' ~ (period.periodNumber - 4) }}</p><p class="mt-2 text-xl font-semibold">{{ period.teamPoints is not null ? period.teamPoints : '—' }} : {{ period.opponentPoints is not null ? period.opponentPoints : '—' }}</p></div>{% endfor %}</div></section>{% endif %}
 {% if stats %}
     {{ form_start(form, {attr: {class: 'workspace-form mt-6', 'data-turbo': 'false'}}) }}
     {{ form_errors(form) }}{{ form_errors(form.stats) }}
     <div class="grid gap-6 md:grid-cols-2">
         {% for playerId, statForm in form.stats %}
             <fieldset class="panel min-w-0">
-                <legend class="px-2 text-lg font-semibold"><a class="hover:text-orange-300" href="{{ path('app_player_show',{teamId:team.id,id:playerId}) }}">{{ stats[playerId].player.fullName }} ↗</a></legend>
-                {% if stats[playerId].jerseyNumber is not null %}<p class="mb-4 text-xs text-orange-300">N° {{ stats[playerId].jerseyNumber }} dans ce match{% if stats[playerId].starter %} · Cinq de départ{% endif %}{% if stats[playerId].captain %} · Capitaine{% endif %}</p>{% endif %}
-                {% if stats[playerId].fieldGoalsMade is not null %}<p class="mb-4 text-xs text-slate-400">Paniers réussis : {{ stats[playerId].fieldGoalsMade }} · 2 pts intérieurs : {{ stats[playerId].twoPtInsideMade ?? '—' }} · 2 pts extérieurs : {{ stats[playerId].twoPtOutsideMade ?? '—' }}</p>{% endif %}
+                <legend class="px-2 text-lg font-semibold"><a class="hover:text-accent" href="{{ path('app_player_show',{teamId:team.id,id:playerId}) }}">{{ stats[playerId].player.fullName }} ↗</a></legend>
+                {% if stats[playerId].jerseyNumber is not null %}<p class="mb-4 text-xs text-accent">N° {{ stats[playerId].jerseyNumber }} dans ce match{% if stats[playerId].starter %} · Cinq de départ{% endif %}{% if stats[playerId].captain %} · Capitaine{% endif %}</p>{% endif %}
+                {% if stats[playerId].fieldGoalsMade is not null %}<p class="mb-4 text-xs text-muted">Paniers réussis : {{ stats[playerId].fieldGoalsMade }} · 2 pts intérieurs : {{ stats[playerId].twoPtInsideMade ?? '—' }} · 2 pts extérieurs : {{ stats[playerId].twoPtOutsideMade ?? '—' }}</p>{% endif %}
                 {{ form_errors(statForm) }}
                 {{ form_row(statForm.participation) }}
                 <div class="grid grid-cols-2 gap-4">
@@ -42,13 +44,13 @@
     <button class="button-primary mt-8" type="submit">Enregistrer les statistiques</button>
     {{ form_end(form) }}
 {% else %}
-    <section class="panel mt-6"><p class="text-slate-400">Ajoutez des joueurs à l’équipe pour saisir leurs statistiques.</p><a class="button-primary mt-4" href="{{ path('app_player_new', {id: team.id}) }}">Ajouter un joueur</a></section>
+    <section class="panel mt-6"><p class="text-muted">Ajoutez des joueurs à l’équipe pour saisir leurs statistiques.</p><a class="button-primary mt-4" href="{{ path('app_player_new', {id: team.id}) }}">Ajouter un joueur</a></section>
 {% endif %}
 {% if importJob %}
-    <section class="panel mt-8"><h2 class="text-xl font-semibold">Informations de l’export FFBB</h2><p class="mt-4 text-slate-300">Rencontre {{ game.externalReference ?: 'sans numéro lisible' }} · {{ game.importMetadata.competition }} · Poule {{ game.importMetadata.pool ?: '—' }} · {{ game.importMetadata.venue }}</p><p class="mt-2 text-sm text-slate-400">Arbitres : {{ game.importMetadata.officials|filter(v => v)|join(' · ') ?: 'Non renseignés' }}</p>
-    <div class="mt-6 grid gap-4 md:grid-cols-3">{% for key,label in {maxLead:'Avantage maximum',maxRun:'Série maximum',benchPoints:'Points du banc'} %}{% if game.importMetadata.metrics[key] is defined %}<div><p class="text-xs text-slate-400">{{ label }} · Locaux / Visiteurs</p><p class="mt-2 font-semibold">{{ game.importMetadata.metrics[key].home is not null ? game.importMetadata.metrics[key].home : '—' }} / {{ game.importMetadata.metrics[key].away is not null ? game.importMetadata.metrics[key].away : '—' }}</p></div>{% endif %}{% endfor %}</div>
-    {% if game.importMetadata.teamDetails is defined %}<div class="mt-6 grid gap-4 md:grid-cols-2">{% for side,label in {home:'Locaux',away:'Visiteurs'} %}{% if game.importMetadata.teamDetails[side] is defined %}<p class="text-sm text-slate-400">{{ label }} · Entraîneur (OCR) : {{ game.importMetadata.teamDetails[side].coach ?: '—' }} · Couleur : {{ game.importMetadata.teamDetails[side].color ?: '—' }} · Code club (OCR) : {{ game.importMetadata.teamDetails[side].clubCodeOcr ?: '—' }}</p>{% endif %}{% endfor %}</div>{% endif %}
-    {% if game.importMetadata.warnings %}<details class="mt-6"><summary class="text-amber-300">Avertissements conservés lors de l’import</summary><ul class="mt-3 list-inside list-disc space-y-2 text-sm text-slate-400">{% for warning in game.importMetadata.warnings %}<li>{{ warning }}</li>{% endfor %}</ul></details>{% endif %}</section>
+    <section class="panel mt-8"><h2 class="text-xl font-semibold">Informations de l’export FFBB</h2><p class="mt-4 text-subtle">Rencontre {{ game.externalReference ?: 'sans numéro lisible' }} · {{ game.importMetadata.competition }} · Poule {{ game.importMetadata.pool ?: '—' }} · {{ game.importMetadata.venue }}</p><p class="mt-2 text-sm text-muted">Arbitres : {{ game.importMetadata.officials|filter(v => v)|join(' · ') ?: 'Non renseignés' }}</p>
+    <div class="mt-6 grid gap-4 md:grid-cols-3">{% for key,label in {maxLead:'Avantage maximum',maxRun:'Série maximum',benchPoints:'Points du banc'} %}{% if game.importMetadata.metrics[key] is defined %}<div><p class="text-xs text-muted">{{ label }} · Locaux / Visiteurs</p><p class="mt-2 font-semibold">{{ game.importMetadata.metrics[key].home is not null ? game.importMetadata.metrics[key].home : '—' }} / {{ game.importMetadata.metrics[key].away is not null ? game.importMetadata.metrics[key].away : '—' }}</p></div>{% endif %}{% endfor %}</div>
+    {% if game.importMetadata.teamDetails is defined %}<div class="mt-6 grid gap-4 md:grid-cols-2">{% for side,label in {home:'Locaux',away:'Visiteurs'} %}{% if game.importMetadata.teamDetails[side] is defined %}<p class="text-sm text-muted">{{ label }} · Entraîneur (OCR) : {{ game.importMetadata.teamDetails[side].coach ?: '—' }} · Couleur : {{ game.importMetadata.teamDetails[side].color ?: '—' }} · Code club (OCR) : {{ game.importMetadata.teamDetails[side].clubCodeOcr ?: '—' }}</p>{% endif %}{% endfor %}</div>{% endif %}
+    {% if game.importMetadata.warnings %}<details class="mt-6"><summary class="text-warning">Avertissements conservés lors de l’import</summary><ul class="mt-3 list-inside list-disc space-y-2 text-sm text-muted">{% for warning in game.importMetadata.warnings %}<li>{{ warning }}</li>{% endfor %}</ul></details>{% endif %}</section>
     <details class="panel mt-6"><summary class="font-semibold">Statistiques adverses lues dans le document (OCR non corrigé)</summary><div class="mt-4 overflow-x-auto"><table class="import-table"><thead><tr><th>Joueur</th><th>N°</th><th>Points</th><th>Temps</th><th>Fautes</th><th>2 pts</th><th>3 pts</th><th>LF</th></tr></thead><tbody>{% for row in game.importMetadata.opponentPlayers %}<tr><td>{{ row.firstName }} {{ row.lastName }}</td><td>{{ row.jerseyNumber ?? '—' }}</td><td>{{ row.points ?? '—' }}</td><td>{{ row.secondsPlayed is not null ? (row.secondsPlayed // 60) ~ ':' ~ '%02d'|format(row.secondsPlayed % 60) : '—' }}</td><td>{{ row.fouls ?? '—' }}</td><td>{{ row.twoPtMade ?? '—' }}</td><td>{{ row.threePtMade ?? '—' }}</td><td>{{ row.freeThrowsMade ?? '—' }}</td></tr>{% endfor %}</tbody></table></div></details>
     {% include 'import/documents.html.twig' with {job:importJob} %}
 {% endif %}

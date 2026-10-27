@@ -28,7 +28,7 @@ security:
                 enable_csrf: true
                 invalidate_session: true
     access_control:
-        - { path: ^/(login|register)$, roles: PUBLIC_ACCESS, requires_channel: '%auth_required_scheme%' }
+        - { path: ^/(login|register|decouvrir)?$, roles: PUBLIC_ACCESS, requires_channel: '%auth_required_scheme%' }
         - { path: ^/, roles: ROLE_USER, requires_channel: '%auth_required_scheme%' }
 when@test:
     security:

@@ -1,8 +1,8 @@
 {% extends 'workspace.html.twig' %}
-{% block title %}{{ player.fullName }} — Basket Analytics{% endblock %}
+{% block title %}{{ player.fullName }} — BasketMetrics{% endblock %}
 {% block workspace_content %}
-<a class="text-orange-400 underline" href="{{ path('app_team_show',{id:team.id,season:season.year}) }}">← {{ team.name }}</a>
-<h1 class="mt-6 text-3xl font-bold">{{ player.fullName }}</h1>
+<a class="text-accent underline" href="{{ path('app_team_show',{id:team.id,season:season.year}) }}">← {{ team.name }}</a>
+<header class="page-heading mt-6"><div><p class="eyebrow">PROFIL JOUEUR</p><h1>{{ player.fullName }}</h1></div><span class="team-avatar">{{ player.jerseyNumber is not null ? '#' ~ player.jerseyNumber : player.firstName|slice(0,1)|upper }}</span></header>
 <p class="stats-note">{{ team.name }}{% if player.licenseNumber %} · Licence {{ player.licenseNumber }}{% endif %} · Saison {{ season.label }}</p>
 {% include 'statistics/season_filter.html.twig' %}
 <a class="button-secondary mt-6" href="{{ path('app_analysis',{teamId:team.id,scope:'player',target:player.id,season:season.year}) }}">Analyse IA individuelle de la saison</a>
@@ -14,10 +14,10 @@
 <section class="panel mt-6"><h2 class="text-xl font-semibold">Profil de la saison</h2>
 <p class="stats-note">Record : {{ n.best ? n.best.points ~ ' points contre ' ~ n.best.game.opponent : '—' }} · Points / 40 minutes : {{ n.pointsPer40 is not null ? n.pointsPer40|number_format(1, ',') : '—' }} ({{ n.per40Games }} matchs avec points et temps connus).</p>
 <div class="stats-grid mt-4">{% for key,label in {twoPtMade:'Paniers à 2 pts',threePtMade:'Paniers à 3 pts',freeThrowsMade:'Lancers francs réussis'} %}<div class="stat-card"><span>{{ label }}</span><strong>{{ n.metrics[key].total ?? '—' }}</strong><small>{{ n.metrics[key].average is not null ? n.metrics[key].average|number_format(1, ',') : '—' }} / match · {{ n.metrics[key].count }} matchs renseignés</small></div>{% endfor %}</div>
-{% if playerChart %}<div class="stats-chart">{{ render_chart(playerChart) }}</div>{% endif %}
+{% if playerChart %}<div class="stats-chart">{{ render_chart(playerChart, {role: 'img', 'aria-label': 'Évolution des points du joueur par match'}) }}</div>{% endif %}
 <p class="stats-note">Les moyennes excluent les valeurs manquantes et les matchs non joués. Un zéro renseigné est comptabilisé. Les interruptions du graphique correspondent à des points ou participations inconnus, ou à une absence.</p></section>
 <section class="panel mt-6"><h2 class="text-xl font-semibold">Historique des matchs</h2><p class="stats-note">Tous les matchs de l’équipe dans la saison sélectionnée. Les matchs à venir sont exclus des totaux.</p>
-<div class="stats-table-wrap"><table class="stats-table"><thead><tr><th>Date / adversaire</th><th>Résultat</th><th>Participation</th><th>N°</th><th>Points</th><th>Minutes</th><th>Fautes</th></tr></thead><tbody>
+<div class="stats-table-wrap" role="region" aria-label="Historique des matchs, tableau défilant" tabindex="0"><table class="stats-table"><thead><tr><th>Date / adversaire</th><th>Résultat</th><th>Participation</th><th>N°</th><th>Points</th><th>Minutes</th><th>Fautes</th></tr></thead><tbody>
 {% for entry in profile.history %}{% set g=entry.game %}{% set s=entry.stat %}<tr><th><a href="{{ path('app_match_show',{teamId:team.id,id:g.id}) }}">{{ g.playedAt|date('d/m/Y','Europe/Paris') }} · {{ g.opponent }}</a><small>{{ g.home ? 'Domicile' : 'Extérieur' }}</small></th><td>{{ g.status == 'finished' ? (g.teamScore ?? '—') ~ ' : ' ~ (g.opponentScore ?? '—') : 'À jouer' }}</td><td>{{ g.status != 'finished' ? 'À venir' : (s ? (s.effectiveParticipation == 'played' ? 'A joué' : (s.effectiveParticipation == 'did_not_play' ? 'N’a pas joué' : 'Inconnue')) : 'Non renseignée') }}</td><td>{{ s ? (s.jerseyNumber ?? '—') : '—' }}</td><td>{{ s ? (s.points ?? '—') : '—' }}</td><td>{{ s ? s.secondsPlayed|game_time : '—' }}</td><td>{{ s ? (s.fouls ?? '—') : '—' }}</td></tr>{% else %}<tr><td colspan="7">Aucun match dans cette saison.</td></tr>{% endfor %}
 </tbody></table></div></section>
 {% endblock %}

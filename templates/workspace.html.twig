@@ -1,25 +1,38 @@
 {% extends 'base.html.twig' %}
 {% block body %}
-<div class="app-shell">
-    <aside class="app-sidebar">
-        <a href="{{ path('app_dashboard') }}" class="brand"><img src="/favicon.svg" alt="" width="40" height="40"><span>Basket<span class="brand-light">Metrics</span><small>LE JEU. LES CHIFFRES.</small></span></a>
-        <div class="sidebar-section-label">ESPACE COACH</div>
+{% set route = app.current_route %}
+{% set contextTeam = team|default(null) %}
+{% set overview = route == 'app_dashboard' %}
+<a class="skip-link" href="#main-content">Aller au contenu principal</a>
+<div class="app-shell" data-controller="navigation motion">
+    <aside class="app-sidebar" id="app-navigation">
+        <a href="{{ path('app_dashboard') }}" class="brand"><img src="/favicon.svg" alt="" width="36" height="36"><span>Basket<span class="brand-light">Metrics</span><small>BASKETBALL ANALYTICS</small></span></a>
+        <div class="sidebar-section-label">ESPACE DE TRAVAIL</div>
         <nav aria-label="Navigation principale" class="sidebar-nav">
-            <a class="nav-link {{ app.current_route != 'app_team_new' ? 'active' : '' }}" href="{{ path('app_dashboard') }}"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>Mes équipes<span class="nav-dot"></span></a>
-            <a class="nav-link {{ app.current_route == 'app_team_new' ? 'active' : '' }}" href="{{ path('app_team_new') }}"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Créer une équipe</a>
+            <a class="nav-link {{ overview ? 'active' : '' }}" {% if overview %}aria-current="page"{% endif %} href="{{ path('app_dashboard') }}"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>Vue d’ensemble</a>
+
+            {% if contextTeam %}
+            <span class="sidebar-section-label context-label">{{ contextTeam.name }}</span>
+            {% for entry in [['app_team_matches','Matchs','M4 5h16v16H4zM8 3v4M16 3v4M4 11h16'],['app_team_season','Statistiques de saison','M4 20V10M12 20V4M20 20v-7'],['app_team_players','Joueurs','M5 21v-3a7 7 0 0 1 14 0v3M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0']] %}{% set targetRoute = entry[0] %}{% set label = entry[1] %}{% set icon = entry[2] %}
+            {% set selected = route == targetRoute or (targetRoute == 'app_team_players' and route starts with 'app_player') or (targetRoute == 'app_team_matches' and route starts with 'app_match') %}<a class="nav-link {{ selected ? 'active' : '' }}" {% if selected %}aria-current="page"{% endif %} href="{{ path(targetRoute,{id:contextTeam.id,season:season.year|default(null)}) }}"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="{{ icon }}"/></svg>{{ label }}</a>
+            {% endfor %}
+            <a class="nav-link {{ route starts with 'app_import' ? 'active' : '' }}" {% if route starts with 'app_import' %}aria-current="page"{% endif %} href="{{ path('app_import_new',{id:contextTeam.id}) }}"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 16V3M7 8l5-5 5 5M4 15v6h16v-6"/></svg>Importer un match</a>
+            {% endif %}
+            <span class="sidebar-section-label management-label">GESTION</span>
+            <a class="nav-link {{ route == 'app_team_index' ? 'active' : '' }}" {% if route == 'app_team_index' %}aria-current="page"{% endif %} href="{{ path('app_team_index') }}"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6M21 21v-3a6 6 0 0 0-3-5"/></svg>Mes équipes</a>
+            <a class="nav-link {{ route == 'app_team_new' ? 'active' : '' }}" {% if route == 'app_team_new' %}aria-current="page"{% endif %} href="{{ path('app_team_new') }}"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Créer une équipe</a>
         </nav>
-        <div class="sidebar-note"><span class="eyebrow">AU BORD DU TERRAIN</span><p>Chaque match compte.<br>Chaque détail aussi.</p><span class="tiny-court" aria-hidden="true"></span></div>
-        <div class="sidebar-user"><span class="user-avatar">{{ app.user.username|slice(0, 1)|upper }}</span><div><strong>{{ app.user.username }}</strong><small>Mon espace personnel</small></div></div>
+        <div class="sidebar-note"><span class="eyebrow">CHAQUE POSSESSION COMPTE</span><p>Du jeu aux chiffres.<br>Des chiffres au progrès.</p>{% include 'components/court.html.twig' with {courtClass: 'sidebar-court'} %}</div>
+        <div class="sidebar-user"><span class="user-avatar">{{ app.user.username|slice(0, 1)|upper }}</span><div><strong>{{ app.user.username }}</strong><small>Espace personnel</small></div></div>
     </aside>
     <div class="app-main">
-        <header class="app-topbar"><span class="topbar-location"><span class="status-dot"></span>Votre espace basket</span><form action="{{ path('app_logout') }}" method="post" data-turbo="false"><input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}"><button class="logout-button" type="submit">Se déconnecter <span aria-hidden="true">↗</span></button></form></header>
-        <main class="workspace-content" id="main-content">
-            {% for message in app.flashes('success') %}<p role="status" class="success-message"><span aria-hidden="true">✓</span> {{ message }}</p>{% endfor %}
-            {% for message in app.flashes('error') %}<p role="alert" class="mt-4 rounded-xl border border-red-400/30 bg-red-400/10 p-4 text-red-300">{{ message }}</p>{% endfor %}
+        <header class="app-topbar"><button class="mobile-menu button-secondary" type="button" aria-controls="app-navigation" aria-expanded="false" data-navigation-target="toggle" data-action="navigation#toggle">☰ <span>Menu</span></button><span class="topbar-location"><span class="topbar-parent">Espace coach</span><span aria-hidden="true">/</span> <strong>{{ contextTeam ? contextTeam.name : 'BasketMetrics' }}</strong></span><form action="{{ path('app_logout') }}" method="post" data-turbo="false"><input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}"><button class="logout-button" type="submit">Se déconnecter <span aria-hidden="true">↗</span></button></form></header>
+        <main class="workspace-content" id="main-content" tabindex="-1">
+            {% for message in app.flashes('success') %}<p role="status" class="success-message">✓ {{ message }}</p>{% endfor %}
+            {% for message in app.flashes('error') %}<p role="alert" class="error-message">{{ message }}</p>{% endfor %}
             {% block workspace_content %}{% endblock %}
         </main>
-        <footer class="app-footer"><span>BasketMetrics</span><span>De la feuille de match au prochain progrès.</span></footer>
+        <footer class="app-footer"><a href="{{ path('app_landing') }}">BasketMetrics <span class="footer-dot">·</span> Découvrir la plateforme ↗</a><span>Chaque match, un nouveau progrès.</span></footer>
     </div>
 </div>
 {% endblock %}
-

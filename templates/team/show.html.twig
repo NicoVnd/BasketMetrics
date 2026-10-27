@@ -1,32 +1,31 @@
 {% extends 'workspace.html.twig' %}
-{% block title %}{{ team.name }} — Basket Analytics{% endblock %}
+{% block title %}{{ teamView == 'matches' ? 'Matchs · ' : (teamView == 'players' ? 'Joueurs · ' : (teamView == 'season' ? 'Statistiques de saison · ' : '')) }}{{ team.name }} — BasketMetrics{% endblock %}
 {% block workspace_content %}
-    <a href="{{ path('app_dashboard') }}" class="text-sm text-orange-400 underline">← Mes équipes</a>
-    <h1 class="mt-6 text-3xl font-bold">{{ team.name }}</h1>
-    {% if team.category %}<p class="mt-2 text-slate-400">{{ team.category }}</p>{% endif %}
-    {% include 'statistics/team_summary.html.twig' %}
+{% set showSeason = teamView in ['all', 'season'] %}
+{% set showPlayers = teamView in ['all', 'players'] %}
+{% set showMatches = teamView in ['all', 'matches'] %}
+    <a href="{{ path('app_team_index') }}" class="text-sm text-accent underline">← Mes équipes</a>
+    <header class="page-heading mt-6"><div><p class="eyebrow">VOTRE COLLECTIF</p><h1>{{ teamView == 'matches' ? 'Matchs' : (teamView == 'players' ? 'Joueurs' : (teamView == 'season' ? 'Statistiques de saison' : team.name)) }}</h1>{% if teamView != 'all' %}<p class="page-description">{{ team.name }}</p>{% endif %}</div><a class="button-primary" href="{{ path('app_import_new', {id: team.id}) }}">＋ Importer une feuille de match</a></header>
+    {% if team.category %}<p class="mt-2 text-muted">{{ team.category }}</p>{% endif %}
+    {% if showSeason %}
+    <div id="saison">{% include 'statistics/team_summary.html.twig' %}</div>
     <a class="button-secondary mt-6" href="{{ path('app_analysis',{teamId:team.id,scope:'season',target:season.year}) }}">Analyse IA de la saison · équipe et joueurs</a>
-    <a class="button-primary mt-6" href="{{ path('app_import_new', {id: team.id}) }}">Importer un ZIP e-Marque →</a>
-    {% if pendingImports %}<section class="panel mt-6"><h2 class="text-xl font-semibold">Imports à vérifier</h2><ul class="mt-4 space-y-4">{% for job in pendingImports %}<li class="flex flex-wrap items-center justify-between gap-4"><a class="text-orange-300 underline" href="{{ path('app_import_review', {id: job.id}) }}">Aperçu du {{ job.createdAt|date('d/m/Y H:i', 'Europe/Paris') }}</a><form method="post" action="{{ path('app_import_cancel', {id: job.id}) }}" data-turbo="false"><input type="hidden" name="_token" value="{{ csrf_token('cancel_import_' ~ job.id) }}"><button class="button-secondary" type="submit">Annuler</button></form></li>{% endfor %}</ul></section>{% endif %}
-    <div class="mt-8 grid items-start gap-8 lg:grid-cols-2">
-        <section class="panel">
+
+    {% else %}{% include 'statistics/season_filter.html.twig' %}{% endif %}
+    {% if showMatches and pendingImports %}<section class="panel mt-6"><h2 class="text-xl font-semibold">Imports à vérifier</h2><ul class="mt-4 space-y-4">{% for job in pendingImports %}<li class="flex flex-wrap items-center justify-between gap-4"><a class="text-accent underline" href="{{ path('app_import_review', {id: job.id}) }}">Aperçu du {{ job.createdAt|date('d/m/Y H:i', 'Europe/Paris') }}</a><form method="post" action="{{ path('app_import_cancel', {id: job.id}) }}" data-turbo="false"><input type="hidden" name="_token" value="{{ csrf_token('cancel_import_' ~ job.id) }}"><button class="button-secondary" type="submit">Annuler</button></form></li>{% endfor %}</ul></section>{% endif %}
+    <div class="mt-8 grid items-start gap-8 {{ teamView == 'all' ? 'lg:grid-cols-2' : '' }}">
+        {% if showPlayers %}<section class="panel" id="joueurs">
             <div class="flex flex-wrap items-center justify-between gap-4"><h2 class="text-2xl font-semibold">Joueurs ({{ players|length }})</h2><a class="button-secondary" href="{{ path('app_player_new', {id: team.id}) }}">Ajouter un joueur</a></div>
-            <ul class="mt-6 divide-y divide-slate-800">
+            <ul class="mt-6 divide-y divide-theme">
                 {% for player in players %}
-                    <li class="flex items-center gap-4 py-4"><span class="w-10 text-center font-mono text-orange-400">{{ player.jerseyNumber is not null ? '#' ~ player.jerseyNumber : '—' }}</span><a class="hover:text-orange-400" href="{{ path('app_player_show', {teamId: team.id, id: player.id, season: season.year}) }}">{{ player.fullName }}{% if player.licenseNumber %}<small class="mt-1 block text-xs text-slate-400">Licence {{ player.licenseNumber }}</small> {% endif %}</a><form method="post" action="{{ path('app_player_delete', {teamId: team.id, id: player.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce joueur ?')"><input type="hidden" name="_token" value="{{ csrf_token('delete_player_' ~ player.id) }}"><button class="text-red-400 hover:text-red-300" type="submit" title="Supprimer">🗑️</button></form></li>
-                {% else %}<li class="py-4 text-slate-400">Aucun joueur. Ajoutez votre effectif pour saisir les statistiques.</li>{% endfor %}
+                    <li class="flex items-center gap-4 py-4"><span class="w-10 text-center font-mono text-accent">{{ player.jerseyNumber is not null ? '#' ~ player.jerseyNumber : '—' }}</span><a class="hover:text-accent" href="{{ path('app_player_show', {teamId: team.id, id: player.id, season: season.year}) }}">{{ player.fullName }}{% if player.licenseNumber %}<small class="mt-1 block text-xs text-muted">Licence {{ player.licenseNumber }}</small> {% endif %}</a><form method="post" action="{{ path('app_player_delete', {teamId: team.id, id: player.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce joueur ?')"><input type="hidden" name="_token" value="{{ csrf_token('delete_player_' ~ player.id) }}"><button class="text-danger hover:text-danger" type="submit" title="Supprimer" aria-label="Supprimer {{ player.fullName }}">×</button></form></li>
+                {% else %}<li class="py-4 text-muted">Aucun joueur. Ajoutez votre effectif pour saisir les statistiques.</li>{% endfor %}
             </ul>
         </section>
-        <section class="panel">
+        {% endif %}
+        {% if showMatches %}<section class="panel" id="matchs">
             <div class="flex flex-wrap items-center justify-between gap-4"><h2 class="text-2xl font-semibold">Matchs ({{ matches|length }})</h2><a class="button-secondary" href="{{ path('app_match_new', {id: team.id}) }}">Créer un match</a></div>
-            <ul class="mt-6 divide-y divide-slate-800">
-                {% for game in matches %}
-                    <li><a class="block py-4 hover:text-orange-400" href="{{ path('app_match_show', {teamId: team.id, id: game.id}) }}">
-                            <div class="flex flex-wrap items-center justify-between gap-3"><span class="font-semibold">{{ game.opponent }}</span><span class="font-mono">{{ game.teamScore is not null ? game.teamScore : '—' }} : {{ game.opponentScore is not null ? game.opponentScore : '—' }}</span></div>
-                            <p class="mt-2 text-sm text-slate-400">{{ game.playedAt|date('d/m/Y H:i', 'Europe/Paris') }} · {{ game.home ? 'Domicile' : 'Extérieur' }} · {{ game.status == 'finished' ? 'Terminé' : 'À jouer' }}</p>
-                        </a></li>
-                {% else %}<li class="py-4 text-slate-400">Aucun match créé pour cette équipe.</li>{% endfor %}
-            </ul>
-        </section>
+            {% include 'match/list.html.twig' %}
+        </section>{% endif %}
     </div>
 {% endblock %}

@@ -43,6 +43,20 @@ async function main() {
             text: w.text, x: w.bbox.x0, y: w.bbox.y0, width: w.bbox.x1 - w.bbox.x0, height: w.bbox.y1 - w.bbox.y0, confidence: w.confidence,
         })))));
         const words = toWords(result);
+        // Read team names separately: dotted underlines can merge the entire name
+        // into a low-confidence word in the full-page pass.
+        const teamNames = {};
+        if (process.argv[3] === 'summary') {
+            await worker.setParameters({tessedit_pageseg_mode:'7'});
+            for (const [side, top, bottom] of [['home', .006, .017], ['away', .020, .030]]) {
+                const image = await sharp(process.argv[2]).extract({
+                    left: Math.round(.674 * cleaned.width), top: Math.round(top * cleaned.height),
+                    width: Math.round(.311 * cleaned.width), height: Math.round((bottom-top) * cleaned.height),
+                }).resize({height:90}).extend({top:15,bottom:15,left:15,right:15,background:'#fff'}).png().toBuffer();
+                const recognized = await worker.recognize(image, {}, {text:true});
+                if (recognized.data.confidence >= 15) teamNames[side] = recognized.data.text.trim();
+            }
+        }
         await worker.setParameters({tessedit_char_whitelist:'0123456789:', tessedit_pageseg_mode:'6'});
         const numeric = await worker.recognize(cleaned.image, {}, {text:true,blocks:true});
         const cells = [];
@@ -64,7 +78,7 @@ async function main() {
             const recognized=await worker.recognize(image,{}, {text:true});
             cells.push({...r,text:recognized.data.text.trim(),confidence:recognized.data.confidence});
         }
-        process.stdout.write(JSON.stringify({ text: result.text, words, numericWords:toWords(numeric.data), cells, width:w, height:h }));
+        process.stdout.write(JSON.stringify({ text: result.text, words, teamNames, numericWords:toWords(numeric.data), cells, width:w, height:h }));
     } finally { await worker.terminate(); }
 }
 main().catch(() => { console.error('La lecture OCR locale a échoué.'); process.exit(1); });

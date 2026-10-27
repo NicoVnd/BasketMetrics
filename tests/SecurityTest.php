@@ -35,18 +35,54 @@ final class SecurityTest extends WebTestCase
         ]));
     }
 
+    public function testPublicPresentationDoesNotExposeTheWorkspace(): void
+    {
+        $crawler = $this->client->request('GET', '/');
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('h1', 'L’analyse commence.');
+        self::assertSelectorNotExists('.app-sidebar');
+        self::assertSelectorTextNotContains('main', 'ExistingUser');
+        self::assertSelectorExists('a[href="/register"]');
+        self::assertSelectorExists('a[href="/login"]');
+        self::assertSelectorExists('#fonctionnement');
+        self::assertSelectorExists('#analyses');
+        self::assertSelectorCount(5, '.landing-faq-list details');
+        self::assertSelectorExists('meta[name="description"]');
+        $this->client->click($crawler->selectLink('Découvrir le fonctionnement')->link());
+        self::assertResponseIsSuccessful();
+        $this->client->request('GET', '/decouvrir');
+        self::assertResponseIsSuccessful();
+        self::assertResponseHeaderSame('X-Frame-Options', 'DENY');
+
+        $this->client->request('GET', '/teams');
+        self::assertResponseRedirects('http://localhost/login');
+        $this->client->request('GET', '/teams/1/imports/new');
+        self::assertResponseRedirects('http://localhost/login');
+
+        $user = static::getContainer()->get(EntityManagerInterface::class)->getRepository(User::class)->findOneBy(['canonicalUsername'=>'existinguser']);
+        $this->client->loginUser($user);
+        $this->client->request('GET', '/');
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('h1', 'Vue d’ensemble');
+        self::assertSelectorExists('.app-sidebar');
+        $this->client->request('GET', '/decouvrir');
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('.landing-hero-actions', 'Accéder à mon espace');
+        self::assertSelectorNotExists('a[href="/register"]');
+    }
+
     public function testPrivatePageAndLoginLogout(): void
     {
-        $this->client->request('GET', '/');
+        $this->client->request('GET', '/teams');
         self::assertResponseRedirects('http://localhost/login');
         $this->login();
-        self::assertResponseRedirects('http://localhost/');
+        self::assertResponseRedirects('http://localhost/teams');
         $crawler = $this->client->followRedirect();
         self::assertSelectorTextContains('body', 'ExistingUser');
         self::assertResponseHeaderSame('X-Frame-Options', 'DENY');
         $this->client->submit($crawler->selectButton('Se déconnecter')->form());
         self::assertResponseRedirects('/login');
-        $this->client->request('GET', '/');
+        $this->client->request('GET', '/teams');
         self::assertResponseRedirects('http://localhost/login');
     }
 
@@ -58,7 +94,7 @@ final class SecurityTest extends WebTestCase
         $this->client->request('POST', '/login', ['_username' => 'ExistingUser', '_password' => 'A long test passphrase 2026']);
         $this->client->followRedirect();
         self::assertSelectorExists('[role="alert"]');
-        $this->client->request('GET', '/');
+        $this->client->request('GET', '/teams');
         self::assertResponseRedirects('http://localhost/login');
     }
 
@@ -107,7 +143,7 @@ final class SecurityTest extends WebTestCase
         for ($i = 0; $i < 6; ++$i) { $this->login('Wrong password'); }
         $this->login();
         self::assertResponseRedirects('/login');
-        $this->client->request('GET', '/');
+        $this->client->request('GET', '/teams');
         self::assertResponseRedirects('http://localhost/login');
     }
 
@@ -118,7 +154,7 @@ final class SecurityTest extends WebTestCase
         self::assertResponseStatusCodeSame(405);
         $this->client->request('POST', '/logout');
         self::assertResponseStatusCodeSame(403);
-        $this->client->request('GET', '/');
+        $this->client->request('GET', '/teams');
         self::assertResponseIsSuccessful();
     }
 

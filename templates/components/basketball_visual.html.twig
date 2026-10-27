@@ -1,0 +1,20 @@
+{# Decorative identity illustration: never represents recorded match data. #}
+<svg class="basketball-visual {{ visualClass|default('') }}" viewBox="0 0 240 140" fill="none" aria-hidden="true" focusable="false">
+    <ellipse cx="123" cy="122" rx="91" ry="7" fill="#E9E3D9"/>
+    <path d="M18 100h203M40 100V45h157v55M117 45v55M87 72a30 30 0 0 1 60 0" stroke="#C6C0B6" stroke-width="1.3" stroke-linecap="round"/>
+    {% if variant|default('ball') == 'import' %}
+    <g transform="rotate(-9 82 70)">
+        <rect x="44" y="18" width="77" height="102" rx="8" fill="#FFFFFF" stroke="#C7C5BF" stroke-width="1.4"/>
+        <path d="M60 38h25M60 46h43" stroke="#3D4246" stroke-width="2.2" stroke-linecap="round"/>
+        <rect x="59" y="62" width="8" height="8" rx="2" stroke="#4965ED" stroke-width="1.5"/>
+        <rect x="59" y="80" width="8" height="8" rx="2" stroke="#4965ED" stroke-width="1.5"/>
+        <path d="M76 65h26M76 83h26M59 103h43" stroke="#D5D8E6" stroke-width="2.2" stroke-linecap="round"/>
+    </g>
+    {% endif %}
+    <g transform="rotate(-20 158 78)">
+        <circle cx="158" cy="78" r="40" fill="#FF865B" stroke="#B84C27" stroke-width="1.6"/>
+        <path d="M118 78h80M158 38v80M130 50c31 6 50 27 56 56M186 50c-31 6-50 27-56 56" stroke="#694936" stroke-width="1.7"/>
+        <path d="M137 48a34 34 0 0 1 21-7" stroke="#FFC3A7" stroke-width="3" stroke-linecap="round"/>
+    </g>
+    <path d="m28 26 5 5m-5 0 5-5M209 33v8m-4-4h8" stroke="#A4AECC" stroke-width="1.5" stroke-linecap="round"/>
+</svg>

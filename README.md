@@ -6,6 +6,8 @@ Le projet est en cours de développement et a été pensé initialement pour le 
 
 ## Fonctionnalités
 
+- Page publique de présentation de la plateforme, du fonctionnement des imports et des analyses disponibles.
+
 - Inscription, connexion et gestion des équipes propres à chaque compte.
 - Gestion des joueurs et saisie manuelle des matchs et des statistiques.
 - Import d’archives ZIP e-Marque avec OCR local, prévisualisation et correction avant enregistrement.

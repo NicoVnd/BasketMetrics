@@ -1,0 +1,14 @@
+<ul class="match-list">{% for game in matches %}
+    {% set known = game.status == 'finished' and game.teamScore is not null and game.opponentScore is not null %}
+    {% set result = known ? (game.teamScore > game.opponentScore ? 'V' : (game.teamScore < game.opponentScore ? 'D' : 'N')) : '' %}
+    {% set resultLabel = known ? (result == 'V' ? 'Victoire' : (result == 'D' ? 'Défaite' : 'Match nul')) : (game.status == 'finished' ? 'Terminé' : 'À jouer') %}
+    <li><a href="{{ path('app_match_show',{teamId:team.id,id:game.id}) }}">
+        <span class="match-date">{{ game.playedAt|date('d/m','Europe/Paris') }}<small>{{ game.playedAt|date('Y','Europe/Paris') }}</small></span>
+        <span class="match-teams">{{ team.name }}<small>{{ game.home ? 'vs' : 'chez' }} {{ game.opponent }}</small></span>
+        <span class="match-outcome">
+            <strong class="match-score"><span class="score-for {{ known ? 'score-' ~ result : '' }}">{{ game.teamScore ?? '—' }}</span><span class="score-divider">–</span><span class="score-against">{{ game.opponentScore ?? '—' }}</span></strong>
+            <span class="match-result {{ known ? 'result-' ~ result : '' }}">{{ resultLabel }}</span>
+        </span>
+        <span class="match-arrow" aria-hidden="true">›</span>
+    </a></li>
+{% else %}<li class="stats-note">Aucun match pour cette saison. Importez une feuille de match pour commencer.</li>{% endfor %}</ul>

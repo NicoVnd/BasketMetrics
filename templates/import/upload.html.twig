@@ -2,17 +2,25 @@
 {% block title %}Importer un match — BasketMetrics{% endblock %}
 {% block workspace_content %}
 <div class="mx-auto max-w-2xl">
-    <a href="{{ path('app_team_show',{id:team.id}) }}" class="text-orange-400 underline">← {{ team.name }}</a>
-    <p class="eyebrow mt-8">DU DOCUMENT AU MATCH</p><h1 class="mt-3 text-3xl font-bold">Importer un export e-Marque</h1>
-    <p class="mt-4 text-slate-400">Déposez le ZIP contenant les PDF du match. Vous pourrez vérifier et corriger les données avant de les enregistrer.</p>
-    <section class="panel mt-8">
+    <a href="{{ path('app_team_show',{id:team.id}) }}" class="button-ghost">← {{ team.name }}</a>
+    <p class="eyebrow mt-8">DU DOCUMENT À LA PERFORMANCE</p><h1 class="mt-3">Importer une feuille de match</h1>
+    <p class="mt-4 text-muted">Retrouvez vos statistiques sans tout ressaisir. Importez votre export e-Marque, puis vérifiez les données avant de les enregistrer.</p>
+    <div class="import-steps" aria-label="Étapes de l’import"><span class="current" aria-current="step"><b>1</b> Importer</span><span><b>2</b> Vérifier et corriger</span><span><b>3</b> Analyser le match</span></div>
+    <section class="panel">
         {{ form_start(form,{attr:{class:'workspace-form space-y-5','data-turbo':'false','data-controller':'import-upload','data-action':'submit->import-upload#submit'}}) }}
-        {{ form_widget(form) }}
-        <p class="text-sm text-slate-400">20 Mo maximum · un seul match · résumé statistique requis. La lecture OCR reste locale et peut prendre quelques minutes.</p>
-        <button class="button-primary mt-6" type="submit" data-import-upload-target="button">Analyser les PDF →</button>
-        <p hidden role="status" data-import-upload-target="status" class="text-sm text-orange-300">La lecture OCR est en cours. Gardez cette page ouverte ; aucun match n’est enregistré à cette étape.</p>
+        {{ form_errors(form) }}
+        <div class="upload-zone" data-import-upload-target="zone" data-action="dragover->import-upload#dragover dragleave->import-upload#dragleave drop->import-upload#drop">
+            {% include 'components/basketball_visual.html.twig' with {variant: 'import', visualClass: 'upload-visual'} %}<h2>Déposez votre archive e-Marque</h2><p>ou choisissez un fichier sur votre appareil</p>
+            {{ form_row(form.archive, {attr: {'data-import-upload-target':'file', 'data-action':'change->import-upload#selected', 'aria-describedby':'archive-guidance'}}) }}
+            <p id="archive-guidance">Archive ZIP · 20 Mo maximum · un seul match</p>
+            <p role="status" data-import-upload-target="selection"></p>
+        </div>
+        {{ form_row(form.side) }}
+        <p class="text-sm text-muted">Sélectionnez le côté de votre équipe dans le document. Le résumé statistique PDF est requis dans l’archive.</p>
+        <button class="button-primary mt-6" type="submit" data-import-upload-target="button">Extraire les données du match →</button>
+        <p hidden role="status" data-import-upload-target="status" class="import-loading">Lecture des PDF et reconnaissance des statistiques en cours. Cette étape peut prendre quelques minutes. Gardez cette page ouverte ; aucun match n’est encore enregistré.</p>
         {{ form_end(form) }}
     </section>
-    <section class="panel mt-6"><h2 class="text-lg font-semibold">Ce qui sera récupéré</h2><p class="mt-3 text-sm text-slate-400">Score, date, adversaire, périodes, licences, numéros dans ce match, points, temps de jeu, fautes, tirs réussis, cinq de départ et informations collectives lisibles. Les documents originaux restent consultables dans un espace privé.</p><p class="mt-3 text-sm text-slate-400">Le numéro de maillot ne sert jamais à identifier un joueur entre deux matchs. Les identités proches vous seront proposées pour vérification.</p></section>
+    <section class="panel mt-6"><h2>Vous gardez la main sur vos données</h2><p class="mt-3 text-sm text-muted">Score, adversaire, date, périodes et statistiques individuelles seront proposés pour vérification. Vous pourrez corriger les valeurs et associer les joueurs avant l’enregistrement.</p><p class="mt-3 text-sm text-muted">La lecture OCR reste locale. Les documents originaux restent consultables dans votre espace privé. Une donnée illisible reste inconnue.</p></section>
 </div>
 {% endblock %}

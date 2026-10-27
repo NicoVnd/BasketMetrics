@@ -31,15 +31,22 @@ final class AnalysisDataBuilder
     private function assemble(Team $team,string $scope,int $target,?string $year,?MatchGame $targetGame,?Player $targetPlayer): array
     {
         $season=$this->seasons->load($team,$year);
-        $games=array_values(array_filter($season['summary']['games'], fn($g)=>$g->getStatus()==='finished' && (!$targetGame || $g->getPlayedAt()<$targetGame->getPlayedAt() || ($g->getPlayedAt()==$targetGame->getPlayedAt() && $g->getId()<=$targetGame->getId()))));
+        // Match reports receive only this match, including all calculated aggregates.
+        $games=array_values(array_filter($season['summary']['games'], fn($g)=>$g->getStatus()==='finished' && (!$targetGame || $g->getId()===$targetGame->getId())));
         $ids=array_map(fn($g)=>$g->getId(),$games);
         $stats=array_values(array_filter($season['stats'],fn($s)=>in_array($s->getMatchGame()->getId(),$ids,true)));
         $summary=$this->calculator->summarize($games,$stats,$season['players']);
         $collective=$summary;
         foreach (['games','results','form','players'] as $key) { unset($collective[$key]); }
-        $players=[]; $labels=[];
+        $players=[]; $labels=[]; $displayNames=[]; $firstNameCounts=[];
+        foreach ($summary['players'] as $row) {
+            $key=mb_strtolower(trim($row['player']->getFirstName()));
+            $firstNameCounts[$key]=($firstNameCounts[$key]??0)+1;
+        }
         foreach ($summary['players'] as $row) {
             $p=$row['player']; $alias='J'.$p->getId(); $labels[$alias]=$p->getFullName();
+            $firstName=trim($p->getFirstName());
+            $displayNames[$alias]=$firstNameCounts[mb_strtolower($firstName)]>1 ? $firstName.' ('.$alias.')' : $firstName;
             if ($targetPlayer && $p->getId()!==$targetPlayer->getId()) { continue; }
             unset($row['player']);
             if ($row['best']) { $row['best']['game']=$row['best']['game']->getId(); }
@@ -67,6 +74,6 @@ final class AnalysisDataBuilder
             $history[]=['id'=>$g->getId(),'date'=>$g->getPlayedAt()->format(DATE_ATOM),'home'=>$g->isHome(),'teamScore'=>$g->getTeamScore(),'opponentScore'=>$g->getOpponentScore(),'periods'=>$periods,'players'=>$rows];
         }
         $data=['scope'=>$scope,'season'=>$season['label'],'target'=>$scope==='player'?'J'.$target:$target,'units'=>['secondsPlayed'=>'secondes','metrics'=>'total, moyenne sur valeurs connues et count de valeurs connues'],'collective'=>$collective,'players'=>$players,'history'=>$history,'warnings'=>$warnings];
-        return ['data'=>$data,'hash'=>hash('sha256',json_encode($data,JSON_THROW_ON_ERROR)),'season'=>$season['year'],'labels'=>$labels,'hasData'=>count($games)>0,'title'=>$targetGame?'Analyse du match contre '.$targetGame->getOpponent():($targetPlayer?'Analyse de '.$targetPlayer->getFullName():'Analyse collective et individuelle de saison')];
+        return ['data'=>$data,'hash'=>hash('sha256',json_encode($data,JSON_THROW_ON_ERROR)),'season'=>$season['year'],'labels'=>$labels,'displayNames'=>$displayNames,'hasData'=>count($games)>0,'title'=>$targetGame?'Analyse du match contre '.$targetGame->getOpponent():($targetPlayer?'Analyse de '.$targetPlayer->getFullName():'Analyse collective et individuelle de saison')];
     }
 }

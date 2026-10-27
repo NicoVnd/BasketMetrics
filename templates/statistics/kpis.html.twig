@@ -1,0 +1,11 @@
+<div class="stats-grid kpi-grid mt-6">
+    <div class="stat-card stat-record" data-reveal>
+        <span><i class="metric-index" aria-hidden="true">01</i>Bilan de la saison</span>
+        <strong class="record-value"><span class="record-side record-wins"><b>{{ summary.wins }}</b><em>Victoires</em></span><span class="record-divider" aria-hidden="true">/</span><span class="record-side record-losses"><b>{{ summary.losses }}</b><em>Défaites</em></span></strong>
+        <small>{{ summary.draws ? summary.draws ~ ' nuls · ' : '' }}{{ summary.scoredGames }} résultats connus</small>
+    </div>
+    <div class="stat-card" data-reveal><span><i class="metric-index" aria-hidden="true">02</i>Matchs joués</span><strong>{{ summary.finished }}</strong><small>{{ summary.scheduled }} à jouer · {{ season.label }}</small></div>
+    <div class="stat-card stat-accent" data-reveal><span><i class="metric-index" aria-hidden="true">03</i>Taux de victoire</span><strong>{{ summary.winRate is not null ? summary.winRate|number_format(1, ',') : '—' }}<em> %</em></strong><small>Sur les résultats renseignés</small></div>
+    <div class="stat-card" data-reveal><span><i class="metric-index" aria-hidden="true">04</i>Points marqués / match</span><strong>{{ summary.pointsFor.average is not null ? summary.pointsFor.average|number_format(1, ',') : '—' }}</strong><small>{{ summary.pointsFor.count }} matchs renseignés</small></div>
+    <div class="stat-card" data-reveal><span><i class="metric-index" aria-hidden="true">05</i>Points encaissés / match</span><strong>{{ summary.pointsAgainst.average is not null ? summary.pointsAgainst.average|number_format(1, ',') : '—' }}</strong><small>{{ summary.pointsAgainst.count }} matchs renseignés</small></div>
+</div>

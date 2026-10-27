@@ -1,0 +1,65 @@
+{% extends 'base.html.twig' %}
+{% block title %}BasketMetrics — Du match aux progrès{% endblock %}
+{% block metadata %}
+<meta name="description" content="Importez vos feuilles de match e-Marque, vérifiez vos statistiques et analysez les performances de votre équipe et de vos joueurs, match après match et sur la saison.">
+<meta property="og:title" content="BasketMetrics — Du match aux progrès">
+<meta property="og:description" content="Moins de ressaisie, une lecture plus claire du jeu. Découvrez votre espace d’analyse basketball.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:url" content="{{ url('app_landing') }}">
+<link rel="canonical" href="{{ url('app_landing') }}">
+{% endblock %}
+{% block body %}
+{% set entryUrl = app.user ? path('app_dashboard') : path('app_register') %}
+{% set entryLabel = app.user ? 'Accéder à mon espace' : 'Créer mon espace' %}
+<div class="landing-page" data-controller="motion">
+    <a class="skip-link" href="#landing-main">Aller au contenu principal</a>
+    <header class="landing-header">
+        <div class="landing-header-inner">
+            <a class="landing-brand" href="{{ path('app_landing') }}" aria-label="BasketMetrics, accueil"><img src="/favicon.svg" alt="" width="36" height="36"><span>Basket<span>Metrics</span></span></a>
+            <nav class="landing-desktop-nav" aria-label="Navigation de présentation"><a href="#fonctionnement">Comment ça marche</a><a href="#analyses">Les analyses</a><a href="#questions">Questions fréquentes</a></nav>
+            <div class="landing-header-actions">{% if not app.user %}<a class="button-ghost" href="{{ path('app_login') }}">Se connecter</a>{% endif %}<a class="button-primary" href="{{ entryUrl }}">{{ entryLabel }} <span aria-hidden="true">↗</span></a></div>
+            <details class="landing-mobile-menu" data-controller="landing-menu" data-action="click->landing-menu#navigate keydown.esc->landing-menu#close"><summary>Menu <span aria-hidden="true">＋</span></summary><nav aria-label="Navigation mobile de présentation"><a href="#fonctionnement">Comment ça marche</a><a href="#analyses">Les analyses</a><a href="#questions">Questions fréquentes</a>{% if not app.user %}<a href="{{ path('app_login') }}">Se connecter</a>{% endif %}<a class="button-primary" href="{{ entryUrl }}">{{ entryLabel }} ↗</a></nav></details>
+        </div>
+    </header>
+    <main id="landing-main" tabindex="-1">
+        <section class="landing-hero landing-container">
+            <div class="landing-hero-copy" data-reveal>
+                <p class="landing-kicker"><span aria-hidden="true"></span> POUR LES COACHS ET LEUR COLLECTIF</p>
+                <h1>Le match se termine.<br><span>L’analyse commence.</span></h1>
+                <p class="landing-lead">Vos feuilles de match ont beaucoup à raconter. Importez vos exports e-Marque et donnez du sens aux performances de votre équipe, de vos joueurs et de votre saison.</p>
+                <div class="landing-hero-actions"><a class="button-primary" href="{{ entryUrl }}">{{ entryLabel }} <span aria-hidden="true">↗</span></a><a class="button-ghost" href="#fonctionnement">Découvrir le fonctionnement <span aria-hidden="true">↓</span></a></div>
+                <p class="landing-hero-note">Import e-Marque · Vérification des données · Statistiques de saison</p>
+            </div>
+            {% include 'landing/visual.html.twig' %}
+        </section>
+        <div class="landing-scope landing-container" aria-label="Périmètre de l’analyse"><p>Une même équipe.<br><strong>Trois façons de lire le jeu.</strong></p><span><b aria-hidden="true">01</b> Le match</span><span><b aria-hidden="true">02</b> Le joueur</span><span><b aria-hidden="true">03</b> La saison</span></div>
+        <section class="landing-workflow landing-container landing-section" id="fonctionnement">
+            <div class="landing-section-intro" data-reveal><p class="eyebrow">DE LA FEUILLE AU TERRAIN</p><h2>Trois étapes.<br>Une lecture plus claire.</h2><p>Gardez votre énergie pour le coaching. BasketMetrics rassemble les chiffres et vous laisse le dernier mot sur les données.</p><div class="landing-workflow-art">{% include 'components/basketball_visual.html.twig' with {variant:'import'} %}<span>Le document devient un point de départ.</span></div></div>
+            <ol class="landing-steps">
+                <li data-reveal><span class="landing-step-number">01</span><div><h3>Importez votre match.</h3><p>Déposez votre archive ZIP e-Marque avec le résumé statistique PDF. La lecture des documents extrait les informations disponibles.</p><span class="landing-detail">Export FFBB portrait · 20 Mo maximum</span></div></li>
+                <li data-reveal><span class="landing-step-number">02</span><div><h3>Vérifiez. Corrigez. Validez.</h3><p>Contrôlez les scores, associez les joueurs à votre effectif et corrigez les valeurs lues avant tout enregistrement.</p><span class="landing-detail">Vous gardez la main sur chaque donnée.</span></div></li>
+                <li data-reveal><span class="landing-step-number">03</span><div><h3>Faites parler les performances.</h3><p>Retrouvez le détail du match, les fiches joueurs et les tendances de saison. Une même base pour préparer la suite.</p><span class="landing-detail">Matchs · Joueurs · Saison</span></div></li>
+            </ol>
+        </section>
+        <section class="landing-features landing-container landing-section" id="analyses">
+            <div class="landing-section-heading" data-reveal><div><p class="eyebrow">L’ESSENTIEL, SOUS LE BON ANGLE</p><h2>Les chiffres sont là.<br>Les repères aussi.</h2></div><p>Du résultat collectif au parcours individuel, retrouvez les informations qui éclairent votre lecture du jeu.</p></div>
+            <div class="landing-feature-grid">
+                <article class="landing-feature landing-feature-team" data-reveal><div class="landing-feature-top"><span class="landing-feature-tag">LE COLLECTIF</span><span aria-hidden="true">↗</span></div><h3>L’équipe,<br>en un coup d’œil.</h3><p>Victoires, défaites, points marqués et encaissés : le bilan de votre équipe reste au premier plan.</p><ul><li>Bilan et taux de victoire</li><li>Résultats des dernières rencontres</li><li>Évolution des scores dans la saison</li></ul>{% include 'components/court.html.twig' %}</article>
+                <article class="landing-feature landing-feature-player" data-reveal><span class="landing-feature-tag">LES JOUEURS</span><svg class="landing-jersey" viewBox="0 0 100 100" fill="none" aria-hidden="true"><path d="m34 14-19 10 9 24 10-5v43h32V43l10 5 9-24-19-10c-3 13-29 13-32 0Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M39 47h22M39 56h22M39 65h13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><h3>Chaque joueur.<br>Sa progression.</h3><p>Points, temps de jeu, fautes et tirs réussis, lorsqu’ils sont renseignés. Consultez l’historique des matchs et les moyennes de saison.</p><span class="landing-detail">Les moyennes reposent sur les valeurs connues.</span></article>
+                <article class="landing-feature landing-feature-ai" data-reveal><span class="landing-feature-tag">UN REGARD COMPLÉMENTAIRE</span><span class="landing-ai-symbol" aria-hidden="true">✳</span><h3>Un autre angle<br>sur vos chiffres.</h3><p>Lorsqu’elles sont activées, les analyses Gemini proposent une lecture des performances du match, du joueur ou de la saison.</p><span class="landing-detail">Facultatives. À la demande. À confronter au terrain.</span></article>
+            </div>
+        </section>
+        <section class="landing-principles landing-container" data-reveal><div><p class="eyebrow">DES REPÈRES FIABLES</p><h2>Vos chiffres.<br>Sans raccourcis.</h2></div><div><h3>Inconnu reste inconnu.</h3><p>Une donnée absente n’est pas remplacée par zéro. Les moyennes indiquent les matchs réellement renseignés.</p></div><div><h3>La vérification vous appartient.</h3><p>La reconnaissance des documents peut se tromper. Vous contrôlez les données avant de les intégrer à votre historique.</p></div></section>
+        <section class="landing-faq landing-container landing-section" id="questions"><div class="landing-section-intro" data-reveal><p class="eyebrow">AVANT LE PREMIER MATCH</p><h2>Quelques questions.<br>Des réponses claires.</h2><p>De quoi démarrer avec votre équipe et vos propres feuilles de match.</p></div><div class="landing-faq-list" data-reveal>
+            <details><summary>Quels fichiers puis-je importer ?<span aria-hidden="true">＋</span></summary><p>Une archive ZIP e-Marque, jusqu’à 20 Mo, pour une seule rencontre. Le format pris en charge est l’export FFBB portrait contenant le résumé statistique PDF, accompagné de la feuille de match et, éventuellement, des positions de tirs. Les documents originaux restent consultables dans votre espace privé.</p></details>
+            <details><summary>La saisie manuelle reste-t-elle possible ?<span aria-hidden="true">＋</span></summary><p>Oui. Vous pouvez créer votre équipe, ajouter vos joueurs, créer une rencontre et renseigner les statistiques manuellement, sans passer par un import.</p></details>
+            <details><summary>Que faire si des données sont mal reconnues ?<span aria-hidden="true">＋</span></summary><p>L’aperçu vous permet de corriger les informations extraites et de vérifier les associations de joueurs avant l’enregistrement. Une valeur non lisible peut rester inconnue.</p></details>
+            <details><summary>Puis-je suivre plusieurs équipes et saisons ?<span aria-hidden="true">＋</span></summary><p>Oui. Votre espace peut contenir plusieurs équipes. Chaque équipe possède son effectif, son historique de matchs et ses bilans par saison.</p></details>
+            <details><summary>L’intelligence artificielle est-elle obligatoire ?<span aria-hidden="true">＋</span></summary><p>Non. Les statistiques et les graphiques restent utilisables sans IA. Les analyses Gemini sont facultatives et déclenchées à la demande lorsqu’elles sont activées. Elles s’appuient sur des statistiques pseudonymisées ; les noms, licences et documents PDF ne sont pas envoyés pour cette analyse.</p></details>
+        </div></section>
+        <section class="landing-closing landing-container" data-reveal><div><p class="eyebrow">CHAQUE MATCH, UN NOUVEAU DÉPART</p><h2>Le prochain progrès<br>commence ici.</h2><p>Rassemblez votre collectif. Importez votre première rencontre.<br>Retrouvez une autre lecture de votre jeu.</p></div><a class="button-primary" href="{{ entryUrl }}">{{ entryLabel }} <span aria-hidden="true">↗</span></a>{% include 'components/court.html.twig' %}</section>
+    </main>
+    <footer class="landing-footer landing-container"><a class="landing-brand" href="{{ path('app_landing') }}"><img src="/favicon.svg" alt="" width="30" height="30"><span>Basket<span>Metrics</span></span></a><p>Le jeu. Les chiffres. Le prochain progrès.</p><nav aria-label="Liens de pied de page"><a href="#fonctionnement">Fonctionnement</a><a href="#questions">FAQ</a><a href="{{ app.user ? path('app_dashboard') : path('app_login') }}">{{ app.user ? 'Mon espace' : 'Se connecter' }} ↗</a></nav></footer>
+</div>
+{% endblock %}

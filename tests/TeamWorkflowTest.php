@@ -61,6 +61,23 @@ final class TeamWorkflowTest extends WebTestCase
         foreach (['Alex','Martin','PRIVATE-LICENCE','Lezennes'] as $private) { self::assertStringNotContainsString($private,$json); }
         self::assertCount(2,$builder->build($team,'season',2026)['data']['history']);
         self::assertCount(1,$builder->buildPlayer($team,$player,'2026')['data']['players']);
+        self::assertSame('Alex',$context['displayNames']['J'.$playerId]);
+        $earlier=(new MatchGame())->setTeam($team)->setOpponent('Earlier')->setPlayedAt(new \DateTimeImmutable('2026-10-01'))->setStatus('finished')->setTeamScore(40)->setOpponentScore(30);
+        $earlierStat=(new PlayerMatchStat())->setPlayer($player)->setMatchGame($earlier)->setPoints(20)->setSecondsPlayed(1200);
+        $em->persist($earlier); $em->persist($earlierStat); $em->flush();
+        $matchContext=$builder->build($team,'match',$gameId);
+        self::assertCount(1,$matchContext['data']['history']);
+        self::assertSame($gameId,$matchContext['data']['history'][0]['id']);
+        self::assertSame(75,$matchContext['data']['collective']['pointsFor']['total']);
+        self::assertSame(0,$matchContext['data']['players']['J'.$playerId]['metrics']['points']['total']);
+        self::assertCount(3,$builder->build($team,'season',2026)['data']['history']);
+        self::assertSame(20,$builder->buildPlayer($team,$player,'2026')['data']['players']['J'.$playerId]['metrics']['points']['total']);
+        $homonym=(new Player())->setTeam($team)->setFirstName('alex')->setLastName('Dupont');
+        $em->persist($homonym); $em->flush();
+        $duplicates=$builder->build($team,'season',2026);
+        self::assertSame('Alex (J'.$playerId.')',$duplicates['displayNames']['J'.$playerId]);
+        self::assertSame('alex (J'.$homonym->getId().')',$duplicates['displayNames']['J'.$homonym->getId()]);
+        self::assertStringNotContainsString('Alex',json_encode($duplicates['data']));
     }
 
     public function testAnalysisGenerationPersistenceStalenessAndFailureKeepsReport(): void

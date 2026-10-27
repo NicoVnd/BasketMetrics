@@ -1,8 +1,8 @@
 {% extends 'security/layout.html.twig' %}
-{% block title %}Inscription — Basket Analytics{% endblock %}
+{% block title %}Inscription — BasketMetrics{% endblock %}
 {% block auth_content %}
 <h1 class="text-3xl font-bold">Créer un compte</h1>
-<p class="mt-3 text-slate-300">Choisissez un identifiant et un mot de passe d’au moins 12 caractères.</p>
+<p class="mt-3 text-subtle">Choisissez un identifiant et un mot de passe d’au moins 12 caractères.</p>
 {{ form_start(form, {attr: {'data-turbo': 'false', class: 'auth-form mt-6 space-y-5'}}) }}
     {{ form_errors(form) }}
     {{ form_row(form.username) }}
@@ -10,5 +10,5 @@
     {{ form_row(form.plainPassword.second) }}
     <button class="auth-button" type="submit">Créer mon compte</button>
 {{ form_end(form) }}
-<p class="mt-6 text-sm text-slate-300">Déjà inscrit ? <a class="text-orange-400 underline" href="{{ path('app_login') }}">Se connecter</a></p>
+<p class="mt-6 text-sm text-subtle">Déjà inscrit ? <a class="text-accent underline" href="{{ path('app_login') }}">Se connecter</a></p>
 {% endblock %}

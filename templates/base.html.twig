@@ -2,9 +2,10 @@
 <html lang="fr">
     <head>
         <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <meta name="theme-color" content="#11151c">
+        <title>{% block title %}BasketMetrics{% endblock %}</title>
+        <meta name="theme-color" content="#F5F2EB">
         <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+        {% block metadata %}{% endblock %}
         {% block stylesheets %}
         {% endblock %}
 
@@ -23,4 +24,3 @@
         {% block body %}{% endblock %}
     </body>
 </html>
-
